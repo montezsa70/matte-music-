@@ -17,9 +17,9 @@ jobs:
       - name: Find the project folder
         id: find
         run: |
-          G=$(find . -name gradlew -not -path './.git/*' | head -n 1)
-          if [ -z "$G" ]; then echo "gradlew not found in the repo"; exit 1; fi
-          echo "dir=$(dirname "$G")" >> "$GITHUB_OUTPUT"
+          S=$(find . -name settings.gradle.kts -not -path './.git/*' | head -n 1)
+          if [ -z "$S" ]; then echo "settings.gradle.kts not found in the repo"; exit 1; fi
+          echo "dir=$(dirname "$S")" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v6
         with:
@@ -44,14 +44,12 @@ jobs:
         run: command -v cargo-ndk > /dev/null || cargo install cargo-ndk --version 4.1.2 --locked
 
       - uses: gradle/actions/setup-gradle@v6
-
-      - name: Make gradlew executable
-        working-directory: ${{ steps.find.outputs.dir }}
-        run: chmod +x gradlew
+        with:
+          gradle-version: 9.3.0
 
       - name: Build
         working-directory: ${{ steps.find.outputs.dir }}
-        run: ./gradlew :app:assembleDev --stacktrace
+        run: gradle :app:assembleDev --stacktrace
 
       - uses: actions/upload-artifact@v7
         with:
